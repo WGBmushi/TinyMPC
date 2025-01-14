@@ -5,6 +5,9 @@ target_link_libraries(quadrotor_tracking LINK_PUBLIC tinympcstatic)
 add_executable(quadrotor_hovering quadrotor_hovering.cpp)
 target_link_libraries(quadrotor_hovering LINK_PUBLIC tinympcstatic)
 
+add_executable(quadrotor_hovering_calTime quadrotor_hovering_calTime.cpp)
+target_link_libraries(quadrotor_hovering_calTime LINK_PUBLIC tinympcstatic)
+
 add_executable(cartpole_example cartpole_example.cpp)
 target_link_libraries(cartpole_example LINK_PUBLIC tinympcstatic)
 
