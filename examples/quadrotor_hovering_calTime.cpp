@@ -14,7 +14,7 @@
 #define NSTATES 12
 #define NINPUTS 4
 
-#define NHORIZON 10
+#define NHORIZON 100
 
 #include <iostream>
 
@@ -67,21 +67,21 @@ extern "C"
         tiny_VectorNx Xref_origin;
         // Xref_origin << 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0;
         Xref_origin << 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-        work->Xref = Xref_origin.replicate<1, 10>();
+        work->Xref = Xref_origin.replicate<1, NHORIZON>();
 
         for (int k = 0; k < 70; ++k)
         {
-            printf("Timestep %2d\n:", k);
+            // printf("Timestep %2d\n:", k);
 
             // printf("tracking error at step %2d: %.4f\n", k, (x0 - work->Xref.col(1)).norm());
-            std::cout << "x : " << x0.transpose() << std::endl;
+            // std::cout << "x : " << x0.transpose() << std::endl;
 
             // 1. Update measurement
             tiny_set_x0(solver, x0);
 
             // 2. Solve MPC problem
             tiny_solve(solver);
-            std::cout << "u : " << work->u.col(0).transpose() << std::endl;
+            // std::cout << "u : " << work->u.col(0).transpose() << std::endl;
 
             // 3. Simulate forward
             x0 = work->Adyn * x0 + work->Bdyn * work->u.col(0);
