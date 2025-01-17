@@ -14,7 +14,7 @@
 #define NSTATES 12
 #define NINPUTS 4
 
-#define NHORIZON 100
+#define NHORIZON 10
 
 #include <iostream>
 

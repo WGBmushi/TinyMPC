@@ -149,18 +149,20 @@ extern "C"
             std::cout << "rho = " << rho << std::endl;
         }
 
-        // Riccati recursion to get Kinf, Pinf
+        tinyMatrix Ktp1 = tinyMatrix::Zero(nu, nx);
+        tinyMatrix Ptp1 = rho * tinyMatrix::Ones(nx, 1).array().matrix().asDiagonal();
+
         std::clock_t start_Riccati_recursion, end_Riccati_recursion;
         if (verbose)
         {
             start_Riccati_recursion = std::clock();
         }
 
-        tinyMatrix Ktp1 = tinyMatrix::Zero(nu, nx);
-        tinyMatrix Ptp1 = rho * tinyMatrix::Ones(nx, 1).array().matrix().asDiagonal();
+        // Riccati recursion initiated from the terminal state
         tinyMatrix Kinf = tinyMatrix::Zero(nu, nx);
         tinyMatrix Pinf = tinyMatrix::Zero(nx, nx);
 
+        // Riccati recursion to get Kinf, Pinf
         for (int i = 0; i < 1000; i++)
         {
             Kinf = (R1 + Bdyn.transpose() * Ptp1 * Bdyn).inverse() * Bdyn.transpose() * Ptp1 * Adyn;
@@ -177,6 +179,55 @@ extern "C"
             Ktp1 = Kinf;
             Ptp1 = Pinf;
         }
+
+        /*
+        // Warm start Kinf and Pinf
+        // Significant improvements. For quadrotor-related projects, the Riccati iteration achieves an acceleration of approximately 80%.
+
+        // Riccati recursion to get Kinf, Pinf
+        tinyMatrix Kinf(nu, nx);
+        tinyMatrix Pinf(nx, nx);
+        for (int i = 0; i < 1000; i++)
+        {
+            if (i == 0)
+            {
+                // Initial guess for Kinf and Pinf
+                Kinf << -0.08904, 0.06347, 1.07, -0.3647, -0.5458, -2.089, -0.07684, 0.05341, 0.5225, -0.0348, -0.05539, -0.5286,
+                    0.0849, 0.02487, 1.07, -0.09954, 0.5238, 2.089, 0.07346, 0.01851, 0.5225, -0.005326, 0.05347, 0.5283,
+                    0.002888, -0.02902, 1.07, 0.1215, -0.06214, -2.087, -0.001955, -0.0219, 0.5225, 0.007242, -0.01353, -0.5275,
+                    0.001251, -0.05932, 1.07, 0.3427, 0.08409, 2.088, 0.005337, -0.05002, 0.5225, 0.03289, 0.01544, 0.5278;
+
+                Pinf << 1792, -0.2446, 0.0002435, 1.249, 1719, 16.94, 544.8, -0.2001, 0.0001072, 0.09271, 19.58, 3.218,
+                    -0.2446, 1791, -1.069e-06, -1717, -1.249, -6.774, -0.2001, 544.4, -8.683e-07, -19.39, -0.09273, -1.287,
+                    0.0002435, -1.069e-06, 1074, 6.008e-06, 0.001138, 0.0004983, 0.0001989, -9.098e-07, 95.38, 4.683e-07, 1.444e-05, 2.225e-05,
+                    1.249, -1717, 6.008e-06, 7723, 7.408, 43.66, 1.08, -1313, 5.469e-06, 91.52, 0.6307, 9.029,
+                    1719, -1.249, 0.001138, 7.408, 7738, 109.1, 1315, -1.081, 0.0006945, 0.6307, 92.78, 22.57,
+                    16.94, -6.774, 0.0004983, 43.66, 109.1, 4146, 15.07, -6.029, 0.0004277, 4.098, 10.24, 192.2,
+                    544.8, -0.2001, 0.0001989, 1.08, 1315, 15.07, 349.5, -0.1673, 9.535e-05, 0.08368, 15.3, 2.938,
+                    -0.2001, 544.4, -9.098e-07, -1313, -1.081, -6.029, -0.1673, 349.2, -7.684e-07, -15.13, -0.08369, -1.175,
+                    0.0001072, -8.683e-07, 95.38, 5.469e-06, 0.0006945, 0.0004277, 9.535e-05, -7.684e-07, 51.19, 4.85e-07, 9.362e-06, 2.235e-05,
+                    0.09271, -19.39, 4.683e-07, 91.52, 0.6307, 4.098, 0.08368, -15.13, 4.85e-07, 13.17, 0.06845, 1.013,
+                    19.58, -0.09273, 1.444e-05, 0.6307, 92.78, 10.24, 15.3, -0.08369, 9.362e-06, 0.06845, 13.31, 2.531,
+                    3.218, -1.287, 2.225e-05, 9.029, 22.57, 192.2, 2.938, -1.175, 2.235e-05, 1.013, 2.531, 53.2;
+            }
+            else
+            {
+                Kinf = (R1 + Bdyn.transpose() * Ptp1 * Bdyn).inverse() * Bdyn.transpose() * Ptp1 * Adyn;
+                Pinf = Q1 + Adyn.transpose() * Ptp1 * (Adyn - Bdyn * Kinf);
+            }
+            // if Kinf converges, break
+            if ((Kinf - Ktp1).cwiseAbs().maxCoeff() < 1e-5)
+            {
+                if (verbose)
+                {
+                    std::cout << "Kinf converged after " << i + 1 << " iterations" << std::endl;
+                }
+                break;
+            }
+            Ktp1 = Kinf;
+            Ptp1 = Pinf;
+        }
+        */
 
         if (verbose)
         {

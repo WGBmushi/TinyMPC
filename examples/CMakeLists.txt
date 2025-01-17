@@ -2,6 +2,9 @@
 add_executable(quadrotor_tracking quadrotor_tracking.cpp)
 target_link_libraries(quadrotor_tracking LINK_PUBLIC tinympcstatic)
 
+add_executable(quadrotor_tracking_calTime quadrotor_tracking_calTime.cpp)
+target_link_libraries(quadrotor_tracking_calTime LINK_PUBLIC tinympcstatic)
+
 add_executable(quadrotor_hovering quadrotor_hovering.cpp)
 target_link_libraries(quadrotor_hovering LINK_PUBLIC tinympcstatic)
 
